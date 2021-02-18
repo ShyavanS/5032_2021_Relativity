@@ -15,7 +15,7 @@ public class ClimbCommands {
     public static void onUpClimbHeld(CommandEnvironment env) {
         //env.getRobot().getClimbSubsystem().disengageSolenoid();
         env.getRobot().getClimbSubsystem().windUpClimber(-4);
-        env.getRobot().getClimbSubsystem().windUpHooker();
+        // env.getRobot().getClimbSubsystem().windUpHooker();
     }
 
     @Command
@@ -23,7 +23,7 @@ public class ClimbCommands {
     @TriggerMode(ButtonStatus.WHILE_PRESSED)
     public static void onUpClimbReleased(CommandEnvironment env) {
         //env.getRobot().getClimbSubsystem().engageSolenoid();
-        env.getRobot().getClimbSubsystem().windDownHooker();
+        // env.getRobot().getClimbSubsystem().windDownHooker();
         env.getRobot().getClimbSubsystem().windUpClimber(1);
     }
 
@@ -58,12 +58,12 @@ public class ClimbCommands {
     }
 
     // Tighten the orange one
-    @Command
-    @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.X)
-    @TriggerMode(ButtonStatus.WHILE_PRESSED)
-    public static void button1(CommandEnvironment env) {
-        env.getRobot().getClimbSubsystem().windDownHooker();
-    }
+    // @Command
+    // @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.X)
+    // @TriggerMode(ButtonStatus.WHILE_PRESSED)
+    // public static void button1(CommandEnvironment env) {
+    //     env.getRobot().getClimbSubsystem().windDownHooker();
+    // }
 
     @Command
     @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.X)
@@ -73,12 +73,12 @@ public class ClimbCommands {
     }
 
     // Loosen the orange one.
-    @Command
-    @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.CIRCLE)
-    @TriggerMode(ButtonStatus.WHILE_PRESSED)
-    public static void button2(CommandEnvironment env) {
-        env.getRobot().getClimbSubsystem().windUpHooker();
-    }
+    // @Command
+    // @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.CIRCLE)
+    // @TriggerMode(ButtonStatus.WHILE_PRESSED)
+    // public static void button2(CommandEnvironment env) {
+    //     env.getRobot().getClimbSubsystem().windUpHooker();
+    // }
 
     @Command
     @Trigger(joystick = GameJoystick.DRIVE, value = JoystickButton.CIRCLE)
@@ -116,6 +116,4 @@ public class ClimbCommands {
     public static void button4Release(CommandEnvironment env) {
         env.getRobot().getClimbSubsystem().stop();
     }
-
-
 }

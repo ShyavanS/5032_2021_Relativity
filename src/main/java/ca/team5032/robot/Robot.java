@@ -80,11 +80,11 @@ public class Robot extends TimedRobot {
     this.subsystemManager = new SubsystemManager();
 
     // Subsystem definitions.
-    this.commandSubsystem = new CommandSubsystem(this, true); //
+    this.commandSubsystem = new CommandSubsystem(this, true);
     this.driveSubsystem = new DriveSubsystem(this, true);
     this.autoSubsystem = new AutoSubsystem(this, true);
-    this.climbSubsystem = new ClimbSubsystem(this, true); //
-    this.intakeSubsystem = new IntakeSubsystem(this, true); //
+    this.climbSubsystem = new ClimbSubsystem(this, true);
+    this.intakeSubsystem = new IntakeSubsystem(this, true);
     this.shooterSubsystem = new ShooterSubsystem(this, true);
     this.musicSubsystem = new MusicSubsystem(this, false);
     this.indexingSubsystem = new IndexingSubsystem(this, true);

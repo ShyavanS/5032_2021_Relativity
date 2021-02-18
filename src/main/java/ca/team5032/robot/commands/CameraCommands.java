@@ -11,15 +11,15 @@ import ca.team5032.robot.joystick.GameJoystick;
 @CommandGroup
 public class CameraCommands {
 
-    // @Command
-    // @POVTrigger(joystick = GameJoystick.DRIVE, value = 0)
-    // public static void onNextCamera(CommandEnvironment env) {
-    //     env.getRobot().getCameraSwitcher().nextCamera();
-    // }
+    @Command
+    @POVTrigger(joystick = GameJoystick.DRIVE, value = 0)
+    public static void onNextCamera(CommandEnvironment env) {
+        env.getRobot().getCameraSwitcher().nextCamera();
+    }
 
-    // @Command
-    // @POVTrigger(joystick = GameJoystick.DRIVE, value = 180)
-    // public static void onPreviousCamera(CommandEnvironment env) {
-    //     env.getRobot().getCameraSwitcher().previousCamera();
-    // }
+    @Command
+    @POVTrigger(joystick = GameJoystick.DRIVE, value = 180)
+    public static void onPreviousCamera(CommandEnvironment env) {
+        env.getRobot().getCameraSwitcher().previousCamera();
+    }
 }

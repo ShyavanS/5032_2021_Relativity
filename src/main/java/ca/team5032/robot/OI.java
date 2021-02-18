@@ -16,7 +16,7 @@ public class OI {
 
     public static final int SYSTEM_CLIMB_TALON_LEFT_ID = 7;
     public static final int SYSTEM_CLIMB_TALON_RIGHT_ID = 8;
-    public static final int SYSTEM_CLIMB_HOOKER_ID = 9;
+    // public static final int SYSTEM_CLIMB_HOOKER_ID = 9;
 
     public static final int SYSTEM_INTAKE_VICTOR_INTAKE_ID = 3;
     public static final int SYSTEM_INTAKE_VICTOR_ROTATE_ID = 10;
