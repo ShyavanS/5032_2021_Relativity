@@ -44,6 +44,11 @@ public class SubsystemManager {
         subsystems.forEach(Subsystem::autoPeriodic);
     }
 
+    public void autoInit() {
+        //System.out.println(subsystems.size());
+        subsystems.forEach(Subsystem::autoInit);
+    }
+
     void registerSubsystem(Subsystem subsystem) {
         // Add subsystem to our list for later use.
         this.subsystems.add(subsystem);

@@ -28,6 +28,7 @@ public abstract class Subsystem {
     public void disable() {}
     public void enable() {}
     public void autoPeriodic() {}
+    public void autoInit() {}
 
     public void kill() {}
 

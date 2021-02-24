@@ -107,7 +107,7 @@ public class LimeLight {
     public double getDistance() {
         // (h2 - h1) / tan(a1 + a2) ::: Calculates distance to target.
         double ty = NetworkTableUtils.getDouble(table, "ty");
-        return (OI.LIMELIGHT_HEIGHT_OF_OUTER_PORT - OI.LIMELIGHT_HEIGHT_OF_LIMELIGHT) / Math.tan(OI.LIMELIGHT_ANGLE + ty); // + getTarget().getOffset().y
+        return (OI.LIMELIGHT_HEIGHT_OF_INNER_PORT - OI.LIMELIGHT_HEIGHT_OF_LIMELIGHT) / Math.tan(OI.LIMELIGHT_ANGLE + ty); // + getTarget().getOffset().y
     }
 
     public void finishTarget() {

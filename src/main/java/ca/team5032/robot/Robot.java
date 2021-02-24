@@ -74,7 +74,7 @@ public class Robot extends TimedRobot {
     this.limeLight = new LimeLight();
 
     // Define camera switcher.
-    //this.cameraSwitcher = new CameraSwitcher("Switcher", OI.SYSTEM_CAMERA_USBCAMERA_1, OI.SYSTEM_CAMERA_USBCAMERA_2);
+    this.cameraSwitcher = new CameraSwitcher("Switcher", OI.SYSTEM_CAMERA_USBCAMERA_1, OI.SYSTEM_CAMERA_USBCAMERA_2);
 
     // Define subsystem manager.
     this.subsystemManager = new SubsystemManager();
@@ -153,6 +153,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    subsystemManager.autoInit();
   }
 
   /**

@@ -20,7 +20,7 @@ public class AlignmentCommands {
    @Trigger(joystick = GameJoystick.COSMETIC, value = JoystickButton.R1)
    @TriggerMode(ButtonStatus.WHILE_PRESSED)
    public static void onAlignHeld(CommandEnvironment env) {
-       env.getRobot().getAutoSubsystem().align();
+       env.getRobot().getAutoSubsystem().masterAlign();
    }
 
    @Command
@@ -28,6 +28,8 @@ public class AlignmentCommands {
    @TriggerMode(ButtonStatus.ON_RELEASED)
    public static void onAlignReleased(CommandEnvironment env) {
        env.getRobot().getLimeLight().finishTarget();
+       env.getRobot().getIndexingSubsystem().stop();
+       env.getRobot().getShooterSubsystem().stop();
    }
 
 }
