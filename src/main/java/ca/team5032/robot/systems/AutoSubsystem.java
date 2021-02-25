@@ -47,6 +47,7 @@ public class AutoSubsystem extends Subsystem {
             @Override
             public void run() {
                 getRobot().getLimeLight().finishTarget();
+                getRobot().getDriveSubsystem().stop();
                 getRobot().getIndexingSubsystem().stop();
                 getRobot().getShooterSubsystem().stop();
             }
@@ -131,46 +132,49 @@ public class AutoSubsystem extends Subsystem {
     }
 
     public void masterAlign() {
-        align();
-        double distanceToPort = getRobot().getLimeLight().getDistance();
-        double launchVelocity = Math.sqrt((OI.GRAVITY * Math.pow(distanceToPort, 2)) / ((2 * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2)) * (OI.LIMELIGHT_HEIGHT_OF_SHOOTER + distanceToPort * Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE) - OI.LIMELIGHT_HEIGHT_OF_INNER_PORT)));
-        if (launchVelocity > OI.MAX_SPEED) {
-            launchVelocity = OI.MAX_SPEED;
-            double a = -OI.GRAVITY / (2 * Math.pow(launchVelocity, 2) * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2));
-            double b = Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE);
-            double c = OI.LIMELIGHT_HEIGHT_OF_INNER_PORT;
-            distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
-            if (distanceToPort == getRobot().getLimeLight().getDistance()) {
+        boolean done = align();
+        if (done) {
+            double distanceToPort = getRobot().getLimeLight().getDistance();
+            double launchVelocity = Math.sqrt((OI.GRAVITY * Math.pow(distanceToPort, 2)) / ((2 * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2)) * (OI.LIMELIGHT_HEIGHT_OF_SHOOTER + distanceToPort * Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE) - OI.LIMELIGHT_HEIGHT_OF_INNER_PORT)));
+            if (launchVelocity > OI.MAX_SPEED) {
+                launchVelocity = OI.MAX_SPEED;
+                double a = -OI.GRAVITY / (2 * Math.pow(launchVelocity, 2) * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2));
+                double b = Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE);
+                double c = OI.LIMELIGHT_HEIGHT_OF_INNER_PORT;
+                distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
+                if (distanceToPort == getRobot().getLimeLight().getDistance()) {
+                    getRobot().getDriveSubsystem().stop();
+                    if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
+                        getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
+                    } else {
+                        getRobot().getShooterSubsystem().shoot();
+                    }
+                } else {
+                    getRobot().getDriveSubsystem().tankDrive(0.2, 0.2); // Reduce speed if necessary
+                }
+            } else if (launchVelocity < OI.MIN_SPEED) {
+                launchVelocity = OI.MIN_SPEED;
+                double a = -OI.GRAVITY / (2 * Math.pow(launchVelocity, 2) * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2));
+                double b = Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE);
+                double c = OI.LIMELIGHT_HEIGHT_OF_INNER_PORT;
+                distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
+                if (distanceToPort == getRobot().getLimeLight().getDistance()) {
+                    getRobot().getDriveSubsystem().stop();
+                    if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
+                        getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
+                    } else {
+                        getRobot().getShooterSubsystem().shoot();
+                    }
+                } else {
+                    getRobot().getDriveSubsystem().tankDrive(-0.2, -0.2); // Reduce speed if necessary
+                }
+            } else {
                 getRobot().getDriveSubsystem().stop();
                 if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
                     getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
                 } else {
                     getRobot().getShooterSubsystem().shoot();
                 }
-            } else {
-                getRobot().getDriveSubsystem().tankDrive(0.2, 0.2);
-            }
-        } else if (launchVelocity < OI.MIN_SPEED) {
-            launchVelocity = OI.MIN_SPEED;
-            double a = -OI.GRAVITY / (2 * Math.pow(launchVelocity, 2) * Math.pow(Math.cos(OI.LIMELIGHT_SHOOTER_ANGLE), 2));
-            double b = Math.tan(OI.LIMELIGHT_SHOOTER_ANGLE);
-            double c = OI.LIMELIGHT_HEIGHT_OF_INNER_PORT;
-            distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
-            if (distanceToPort == getRobot().getLimeLight().getDistance()) {
-                getRobot().getDriveSubsystem().stop();
-                if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
-                    getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
-                } else {
-                    getRobot().getShooterSubsystem().shoot();
-                }
-            } else {
-                getRobot().getDriveSubsystem().tankDrive(-0.2, -0.2);
-            }
-        } else {
-            if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
-                getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
-            } else {
-                getRobot().getShooterSubsystem().shoot();
             }
         }
     }
@@ -193,12 +197,12 @@ public class AutoSubsystem extends Subsystem {
         // }
     }
 
-    public void align() {
+    public boolean align() {
         LimeLightTarget target = getRobot().getLimeLight().getTarget();
-        if (target == null) return;
+        if (target == null) return false;
 
         Vector2d offset = target.getOffset();
-        if (offset.x == 0) return;
+        if (offset.x == 0) return true;
 
         double slowingRadius = 16;
         double maxVelocity = 0.485;
@@ -234,11 +238,12 @@ public class AutoSubsystem extends Subsystem {
                     Math.min(desired, -0.4);
         } else {
             getRobot().getDriveSubsystem().stop();
-            return;
+            return true;
         }
 
         SmartDashboard.putNumber("Desired Velocity", desired);
 
         getRobot().getDriveSubsystem().tankDrive(desired, desired);
+        return false;
     }
 }

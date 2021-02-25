@@ -2,6 +2,7 @@ package ca.team5032.robot;
 
 public class OI {
 
+    // Falcon 500 stuff
     public static final int UNITS_PER_ROTATION = 2048;
     public static final double WHEEL_CIRCUMFERENCE = 6 * Math.PI;
 
@@ -21,8 +22,8 @@ public class OI {
     public static final boolean DISCONTINUITY_PRESENT = true;
 	public static final int BOOK_END_0 = 910;   /* 80 deg */
     public static final int BOOK_END_1 = 1137;	/* 100 deg */
-    public static final double MAX_SPEED = 8500; // In RPM TODO: Get actual value using physics
-    public static final double MIN_SPEED = 500; // In RPM TODO: Get actual value using physics
+    public static final double MAX_SPEED = 8500 * LAUNCHER_CIRCUMFERENCE / 60; // In m/s TODO: Get actual value using physics
+    public static final double MIN_SPEED = 500 * LAUNCHER_CIRCUMFERENCE / 60; // In m/s TODO: Get actual value using physics
 
     // TODO: actual values
     // TODO: better names

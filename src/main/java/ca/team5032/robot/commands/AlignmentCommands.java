@@ -28,6 +28,7 @@ public class AlignmentCommands {
    @TriggerMode(ButtonStatus.ON_RELEASED)
    public static void onAlignReleased(CommandEnvironment env) {
        env.getRobot().getLimeLight().finishTarget();
+       env.getRobot().getDriveSubsystem().stop();
        env.getRobot().getIndexingSubsystem().stop();
        env.getRobot().getShooterSubsystem().stop();
    }

@@ -23,8 +23,8 @@ public class ShooterSubsystem extends Subsystem {
 
     // private Counter encoder;
     // private int rpm;
-    private int target = 100;
-    private double speed = 1.0;
+    // private int target = 100;
+    // private double speed = 1.0;
 
     public ShooterSubsystem(Robot robot, boolean defaultEnabled) {
         super(robot, "ShooterSubsystem", defaultEnabled);
