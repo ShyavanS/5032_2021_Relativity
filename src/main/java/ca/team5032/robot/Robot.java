@@ -4,7 +4,7 @@
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
-
+//TODO add PID in shooter and auto, calculate min-max speeds of shooter motor using physics, & obtain all other constants from CAD
 package ca.team5032.robot;
 
 import ca.team5032.robot.framework.command.CommandGroup;
@@ -169,6 +169,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     subsystemManager.enable();
     getClimbSubsystem().disengageSolenoid();
+    getShooterSubsystem().loopReset();
   }
 
   /**

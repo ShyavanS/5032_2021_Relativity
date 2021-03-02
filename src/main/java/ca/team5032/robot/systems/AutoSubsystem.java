@@ -37,6 +37,7 @@ public class AutoSubsystem extends Subsystem {
     @Override
     public void autoInit() {
         getRobot().getLimeLight().startTarget(LimeLight.Pipeline.REFLECTIVE_TAPE);
+        getRobot().getShooterSubsystem().loopReset();
     }
 
     @Override
@@ -144,11 +145,14 @@ public class AutoSubsystem extends Subsystem {
                 distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
                 if (distanceToPort == getRobot().getLimeLight().getDistance()) {
                     getRobot().getDriveSubsystem().stop();
-                    if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
+                    getRobot().getShooterSubsystem().loopSetNext(launchVelocity / OI.LAUNCHER_RADIUS); // C
+                    if (getRobot().getShooterSubsystem().launchVelocity() >= launchVelocity) {
                         getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
-                    } else {
-                        getRobot().getShooterSubsystem().shoot();
                     }
+                    getRobot().getShooterSubsystem().loopCorrect(); // C
+                    getRobot().getShooterSubsystem().loopPredict(); // C
+                    double nextVoltage = getRobot().getShooterSubsystem().loopVoltage(); // C
+                    getRobot().getShooterSubsystem().shootVoltage(nextVoltage); // C
                 } else {
                     getRobot().getDriveSubsystem().tankDrive(0.2, 0.2); // Reduce speed if necessary
                 }
@@ -160,21 +164,27 @@ public class AutoSubsystem extends Subsystem {
                 distanceToPort = Math.min(quadraticSolve(a, b, c, true), quadraticSolve(a, b, c, false));
                 if (distanceToPort == getRobot().getLimeLight().getDistance()) {
                     getRobot().getDriveSubsystem().stop();
-                    if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
+                    getRobot().getShooterSubsystem().loopSetNext(launchVelocity / OI.LAUNCHER_RADIUS); // C
+                    if (getRobot().getShooterSubsystem().launchVelocity() >= launchVelocity) {
                         getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
-                    } else {
-                        getRobot().getShooterSubsystem().shoot();
                     }
+                    getRobot().getShooterSubsystem().loopCorrect(); // C
+                    getRobot().getShooterSubsystem().loopPredict(); // C
+                    double nextVoltage = getRobot().getShooterSubsystem().loopVoltage(); // C
+                    getRobot().getShooterSubsystem().shootVoltage(nextVoltage); // C
                 } else {
                     getRobot().getDriveSubsystem().tankDrive(-0.2, -0.2); // Reduce speed if necessary
                 }
             } else {
                 getRobot().getDriveSubsystem().stop();
-                if (getRobot().getShooterSubsystem().launchVelocity() == launchVelocity) {
+                getRobot().getShooterSubsystem().loopSetNext(launchVelocity / OI.LAUNCHER_RADIUS); // C
+                if (getRobot().getShooterSubsystem().launchVelocity() >= launchVelocity) {
                     getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
-                } else {
-                    getRobot().getShooterSubsystem().shoot();
                 }
+                getRobot().getShooterSubsystem().loopCorrect(); // C
+                getRobot().getShooterSubsystem().loopPredict(); // C
+                double nextVoltage = getRobot().getShooterSubsystem().loopVoltage(); // C
+                getRobot().getShooterSubsystem().shootVoltage(nextVoltage); // C
             }
         }
     }

@@ -11,14 +11,30 @@ import com.ctre.phoenix.motorcontrol.can.*;
 // import edu.wpi.first.wpilibj.AnalogInput;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.SpeedController;
+
+import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator;
+import edu.wpi.first.wpilibj.estimator.KalmanFilter;
+// import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.system.LinearSystem;
+import edu.wpi.first.wpilibj.system.LinearSystemLoop;
+import edu.wpi.first.wpilibj.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.system.plant.LinearSystemId;
+import edu.wpi.first.wpiutil.math.Nat;
+import edu.wpi.first.wpiutil.math.VecBuilder;
+import edu.wpi.first.wpiutil.math.numbers.N1;
 
 public class ShooterSubsystem extends Subsystem {
 
     // TODO: better names based on function
     private WPI_TalonSRX speedController;
+
+    // Initialize stuff for special PID using flywheel inertia to derive gains without physical robot
+    // TODO change everything marked with "C" to reflect physical robot using VelocityClosedLoop method from TalonSRX rather than WPILib LinearSystemLoop
+    private final LinearSystem<N1, N1, N1> flywheelPlant; // C
+    private final KalmanFilter<N1, N1, N1> observerFilter; // C
+    private final LinearQuadraticRegulator<N1, N1, N1> controller; // C
+    private final LinearSystemLoop<N1, N1, N1> loop; // C
     // private WPI_VictorSPX hoodController;
 
     // private Counter encoder;
@@ -29,17 +45,41 @@ public class ShooterSubsystem extends Subsystem {
     public ShooterSubsystem(Robot robot, boolean defaultEnabled) {
         super(robot, "ShooterSubsystem", defaultEnabled);
         this.speedController = new WPI_TalonSRX(6);
+        // Stuff for PID again
+        this.flywheelPlant = LinearSystemId.createFlywheelSystem( // C
+            DCMotor.getAndymarkRs775_125(1),
+            OI.FLYWHEEL_MOMENT_OF_INERTIA,
+            OI.FLYWHEEL_GEARING); 
+        this.observerFilter = new KalmanFilter<>( // C
+            Nat.N1(),
+            Nat.N1(),
+            flywheelPlant,
+            VecBuilder.fill(3.0), // How accurate we think the model is
+            VecBuilder.fill(0.01), // How accurate we think the encoder is
+            0.020);
+        this.controller = new LinearQuadraticRegulator<>( // C
+            flywheelPlant,
+            VecBuilder.fill(6.0), // Velocity error tolerance, how much speed is allowed to be off in rad/s
+            VecBuilder.fill(12.0), // Voltage tolerance, start at battery V, or 12V
+            0.020); // Nominal time between loops
+        // initialize loop for monitoring speed
+        this.loop = new LinearSystemLoop<>( // C
+            flywheelPlant,
+            controller,
+            observerFilter,
+            12.0,
+            0.020);
         // this.hoodController = new WPI_VictorSPX(OI.SYSTEM_SHOOTER_HOOD_VICTOR_ID);
         // this.encoder = new Counter(0);
         // this.angle = new AnalogInput(0);
         // this.encoder.setDistancePerPulse(1);
         initQuadrature();
-	    this.speedController.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, OI.TIMEOUT);
+        this.speedController.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, OI.TIMEOUT);
     }
 
     public void initQuadrature() {
 		/* get the absolute pulse width position */
-		int pulseWidth = speedController.getSensorCollection().getPulseWidthPosition();
+		int pulseWidth = this.speedController.getSensorCollection().getPulseWidthPosition();
 
 		/**
 		 * If there is a discontinuity in our measured range, subtract one half
@@ -66,7 +106,7 @@ public class ShooterSubsystem extends Subsystem {
 		pulseWidth = pulseWidth & 0xFFF;
 
 		/* Update Quadrature position */
-		speedController.getSensorCollection().setQuadraturePosition(pulseWidth, OI.TIMEOUT);
+		this.speedController.getSensorCollection().setQuadraturePosition(pulseWidth, OI.TIMEOUT);
 	}
 
     // public AnalogInput getAngle() {
@@ -74,7 +114,42 @@ public class ShooterSubsystem extends Subsystem {
     // }
 
     public double launchVelocity() {
-        return speedController.getSensorCollection().getQuadratureVelocity() / OI.MAG_UNITS_PER_ROTATION * OI.LAUNCHER_CIRCUMFERENCE * OI.MAG_SPEED_TIME;
+        return (this.speedController.getSensorCollection().getQuadratureVelocity() / OI.MAG_UNITS_PER_ROTATION * OI.MAG_SPEED_TIME * 2 * Math.PI) * OI.LAUNCHER_RADIUS; // To get m/s tangential from angular velocity
+    }
+
+    // For getting encoder values to pass to PID solution
+    public double angularVelocity() { // C
+        return this.speedController.getSensorCollection().getQuadratureVelocity() / OI.MAG_UNITS_PER_ROTATION * OI.MAG_SPEED_TIME * 2 * Math.PI;
+    }
+
+    // For resetting loop for PID solution
+    public void loopReset() { // C
+        this.loop.reset(VecBuilder.fill(angularVelocity()));
+    }
+
+    // For correcting loop for PID solution
+    public void loopCorrect() { // C
+        this.loop.correct(VecBuilder.fill(angularVelocity()));
+    }
+
+    // For predicting loop for PID solution
+    public void loopPredict() { // C
+        this.loop.predict(0.020);
+    }
+
+    // Getting motor voltage
+    public double loopVoltage() { // C
+        return this.loop.getU(0);
+    }
+
+    // Set next for loop
+    public void loopSetNext(double velocity) { // C
+        this.loop.setNextR(VecBuilder.fill(velocity));
+    }
+
+    // Set motor voltage to shoot
+    public void shootVoltage(double volts) { // C
+        this.speedController.setVoltage(volts);
     }
 
     @Override
@@ -118,12 +193,13 @@ public class ShooterSubsystem extends Subsystem {
         //     // speed = true;
         //     getRobot().getIndexingSubsystem().channelBottom.set(-0.7);
         // }
-        speedController.set(-1);
+        this.speedController.set(-1);
     }
 
     public void stop() {
         // this.hoodController.set(0.0);
         this.speedController.set(0.0);
+        loopSetNext(0.0); // C
         getRobot().getIndexingSubsystem().stop();
     }
 
